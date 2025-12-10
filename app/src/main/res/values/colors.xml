@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Cyberpunk theme colors -->
+    <color name="black">#000000</color>
+    <color name="neon_green">#00FF41</color>
+    <color name="neon_blue">#00D9FF</color>
+    <color name="neon_red">#FF0055</color>
+    <color name="neon_purple">#B026FF</color>
+    <color name="dark_gray">#1A1A1A</color>
+    <color name="medium_gray">#2D2D2D</color>
+    <color name="light_gray">#404040</color>
+    
+    <!-- Status colors -->
+    <color name="profit_green">#00FF41</color>
+    <color name="loss_red">#FF0055</color>
+    
+    <!-- Background -->
+    <color name="background_primary">#000000</color>
+    <color name="background_secondary">#0D0D0D</color>
+    <color name="surface">#1A1A1A</color>
+</resources>
