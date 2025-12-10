@@ -1,0 +1,105 @@
+Scalping Bot Android App Specifications
+App Name: NeoScalp
+(Chosen for its sci-fi, Matrix-inspired vibe—evoking "Neo" from The Matrix for the cyberpunk hacker feel, combined with "scalp" for day trading precision. The name implies a futuristic, intelligent trading agent.)
+1. Overview
+
+App Purpose: A modern, sci-fi themed Android app for automated and semi-automated scalping in stocks using Alpaca API. It streams live prices via WebSocket, displays a live candle chart with technical indicators (EMA, VWAP, RSI, MACD, Bollinger Bands, and Stochastic Oscillator) for smart entry/exit decisions, and supports both long (buy low/sell high) and short (sell high/buy low) trades. The bot dynamically switches between long/short modes based on market trend detection (e.g., via EMA crossovers or VWAP slope). Users can adjust symbols, parameters, and toggle between paper/live modes. It runs as a foreground service for uninterrupted background operation, with pull-down notification snippets for key info. The app emphasizes user control with adjustable parameters in 0.1 increments for fine-tuning entry/exit rules to make them more lax or restrictive. Add risk management features like max risk per trade (default 1% of equity) and daily loss limits to prevent blow-ups. Include a dashboard for real-time P&L tracking and historical performance reports.
+Target Audience: Personal use for day traders; no multi-user features.
+Core Philosophy: The bot makes "smart" decisions using indicators to gauge momentum, overbought/oversold conditions, and trend strength. Entries are based on confluence (e.g., EMA crossover + RSI <30 for longs), exits on targets or reversals. Always prioritize safety with confirmations for live trades.
+Additional Important Features to Add:
+Backtesting Mode: A simulation tab to test strategies on historical data (pulled via Alpaca API) before going live.
+Voice Alerts: Optional text-to-speech for signals (e.g., "Entry signal on JNJ").
+Battery Optimization: Detect and prompt for ignoring battery optimization to ensure foreground service reliability.
+Error Logging: Auto-save logs to a file for debugging; include a "Report Bug" button that emails logs.
+Offline Mode Fallback: If disconnected, show last known data and attempt auto-reconnect every 10 seconds.
+Data Export: Export trade history as CSV for tax/analysis.
+Legal Disclaimer: On first launch and before any trade, show a popup: "Trading involves significant risk of loss. This app is for educational purposes; consult a professional. Not financial advice."
+
+
+2. Tech Stack and Versions
+Use the latest stable versions as of December 2025 to ensure compatibility, security, and performance. Avoid deprecated APIs; target modern Android features for smooth sci-fi animations and background services.
+
+Language: Kotlin 2.0.21 (latest stable for coroutines and Compose integration).
+Build System:
+Gradle: 9.2.1 (latest distribution as of late 2025).
+Android Gradle Plugin (AGP): 8.13.0 (latest major release with improved Compose and Kotlin 2 support).
+
+UI Framework: Jetpack Compose 1.7.0 (for declarative, animated UI with Material Design 3).
+Architecture: MVVM with Coroutines and Flow for reactive data; Hilt 2.52 for dependency injection.
+Networking:
+OkHttp 5.0.0-alpha.14 for WebSocket (Alpaca streaming).
+Retrofit 2.11.0 for REST API calls (Alpaca orders/account).
+
+Database/Storage: Room 2.7.0 for trade logs; EncryptedSharedPreferences 1.2.0 for API keys.
+Charts: MPAndroidChart 3.2.0 for live candle charts (OHLC with indicators overlaid).
+Animations: Lottie-Compose 6.5.2 for cyberpunk effects (e.g., glitchy transitions, neon pulses).
+Notifications/Services: WorkManager 2.10.0 for scheduled tasks; ForegroundService API with NotificationCompat.Builder for persistent status.
+Other Libraries:
+Kotlinx-Coroutines 1.9.0-RC for async.
+Firebase Messaging 23.5.0 (optional for push if needed, but minimize to avoid bloat).
+Text-to-Speech: Android TTS API (built-in).
+
+Min/Target SDK: Min SDK 26 (Android 8.0), Target SDK 35 (Android 15) for modern permissions and foreground services.
+Build Config: Enable minification in release (ProGuard/R8); use Java 17 for compile options.
+
+3. App Structure and Screens
+Use Compose Navigation for seamless routing. Bottom navigation bar with neon-glowing icons (cyberpunk style: green matrix code on black background, glitch animations on taps). Overall theme: Dark mode default with cyberpunk aesthetics—neon greens/blues, matrix rain effects on splash, holographic button hovers, glitch transitions between screens.
+
+Splash Screen: Matrix-style code rain animation (Lottie) with app logo "NeoScalp" emerging. Transitions to onboarding if first launch (key input + disclaimer).
+Home/Dashboard Screen:
+Top: Live price ticker (streaming via WebSocket, with glitchy update animation—green if up, red if down).
+Middle: Live 5-minute candle chart (OHLC bars) with overlaid indicators (EMA 9/21, VWAP, RSI 14, MACD 12/26/9, Bollinger Bands 20/2, Stochastic 14/3/3). Chart auto-zooms to last 1-2 hours; pinch-zoom enabled. Highlight entry/exit signals with neon arrows.
+Bottom: Status bar showing current mode (Long/Short), P&L, equity. Buttons: "Start Bot" (green neon pulse), "Stop Bot" (red glitch).
+Pull-to-refresh for reconnecting WebSocket.
+
+Symbols Tab:
+Editable field to input/change symbol (e.g., JNJ, WMT). Auto-validate via Alpaca API (/v2/assets). Watchlist for up to 5 symbols with quick-switch tabs.
+
+Parameters Tab:
+Sliders/spinners for adjustments in 0.1 increments (e.g., EMA periods: 9.0-21.0 by 0.1; RSI threshold: 30.0-70.0 by 0.1; Target %: 0.3-1.0 by 0.1; Stop %: 0.2-0.5 by 0.1; Max risk %: 0.5-2.0 by 0.1).
+Sections: Entry rules (e.g., EMA crossover sensitivity), Exit rules (e.g., trailing stop toggle), Indicator weights (e.g., VWAP influence 0.1-1.0).
+Save button with validation (e.g., prevent invalid combos like stop > target).
+
+Settings Tab:
+API keys input (secure fields for key/secret; save encrypted).
+Toggle: Paper/Live mode (switches API base URL: paper-api.alpaca.markets vs. api.alpaca.markets).
+Other: Notification preferences (e.g., alert on signals), Theme tweaks (neon intensity), Daily loss limit (e.g., auto-stop if -3%).
+Button: "Test Connection" (pings Alpaca with glitch success animation).
+
+Backtest/Reports Screen:
+Input date range/symbol; run simulation using historical data. Show win rate, avg return, drawdown with matrix-style graphs.
+
+Logs Screen:
+List of trades with details (entry/exit, P&L, indicators at time). Export as CSV.
+
+
+4. Core Functionality Details
+
+Alpaca Integration:
+WebSocket Streaming: Connect to wss://stream.data.alpaca.markets/v2/sip (auth with keys). Subscribe to trades/quotes/bars for the symbol. Update live price and 5-min candles every tick. Handle reconnects automatically.
+REST API: Retrofit for orders (/v2/orders), account info (/v2/account), positions (/v2/positions). Support market/limit orders.
+Paper/Live Swap: Toggle changes base URL; default to paper.
+
+Scalping Bot Logic:
+Mode Switching: Auto-detect market nature: Long if EMA9 > EMA21 and VWAP sloping up; Short if EMA9 < EMA21 and VWAP sloping down. Manual override toggle.
+Entry Rules (Smart Gauging): Require confluence (e.g., for long: RSI <30 + Stochastic oversold + price above VWAP + MACD crossover + Bollinger lower band touch). Adjustable thresholds (e.g., RSI <30.0 by 0.1).
+Exit Rules: Target % (e.g., +0.3-1.0%), trailing stop, or reversal signals (e.g., MACD divergence). Force exit at session end if open.
+Semi/Full Auto: Toggle in settings; semi shows notifications/signals, full executes orders.
+Leverage/Risk: Auto-calculate qty based on equity and max risk % (default 1%). Support up to 4x if PDT allows.
+
+Indicators Implementation:
+Calculate in real-time from streamed bars: EMA (period adjustable), VWAP (intraday reset), RSI, MACD, Bollinger, Stochastic. Overlay on chart with neon lines (green buy signals, red sell).
+
+Notifications and Background:
+Foreground Service: Run bot as foreground service (persistent notification icon). Show snippets in notification drawer: "JNJ: $151.23 | Mode: Short | Signal: Entry Ready".
+Alerts: System notifications for entries/exits, market status (e.g., "Volatility high—pausing bot"). Use vibration/sound.
+
+UI/Theme Details:
+Cyberpunk-Matrix Hybrid: Black background with neon green/blue accents, glitch effects on animations (e.g., price updates flicker like code rain). Holographic buttons (3D glow), matrix font for prices. Dark mode only; subtle particle effects (e.g., digital rain on idle screens).
+Nice Features: Gesture controls (swipe to switch symbols), voice commands for start/stop, customizable neon colors, achievement badges (e.g., "10-Win Streak" with confetti).
+
+Performance/Security:
+Optimize for low battery (throttle updates in background). Encrypt all saved data. Auto-logout after 30 min idle. Handle API rate limits with retries.
+
+
+Build this exactly as specified, and NeoScalp will be a powerhouse—futuristic, user-friendly, and edge-giving for scalping. Test thoroughly on emulator/device before live trading.
